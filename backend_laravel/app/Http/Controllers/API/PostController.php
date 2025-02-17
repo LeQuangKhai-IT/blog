@@ -80,6 +80,17 @@ class PostController extends Controller
     }
 
     /**
+     * Retrieves a list of all posts published.
+     *
+     * @return \Illuminate\Http\JsonResponse;
+     */
+    public function getPublished()
+    {
+        $posts = Post::where('published', true)->get();
+        return response()->json($posts);
+    }
+
+    /**
      * Retrieves popular posts.
      *
      * @param  string  $id

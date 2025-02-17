@@ -31,6 +31,7 @@ class StoreUserRequest extends FormRequest
             'url_fb' => 'nullable|url:http,https',
             'url_linkedin' => 'nullable|url:http,https',
             'remember_token' => 'string',
+            'provider_id ' => 'string|nullable'
         ];
     }
 }

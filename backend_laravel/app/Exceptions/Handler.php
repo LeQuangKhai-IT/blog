@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Throwable;
@@ -46,16 +47,18 @@ class Handler extends ExceptionHandler
     public function register(): void
     {
         $this->reportable(function (Throwable $e) {
-            Log::error('An error occurred: '.$e->getMessage());
+            Log::error('An error occurred: ' . $e->getMessage());
         });
 
         $this->renderable(function (Throwable $e, $request) {
-            if ($e instanceof NotFoundHttpException) {
-                return response()->json(['error' => $e->getMessage()], 404);
-            } elseif ($e instanceof UnauthorizedHttpException) {
+            if ($e instanceof UnauthorizedHttpException) {
                 return response()->json(['error' => $e->getMessage()], 401);
             } elseif ($e instanceof AccessDeniedHttpException) {
                 return response()->json(['error' => $e->getMessage()], 403);
+            } elseif ($e instanceof BadRequestHttpException) {
+                return response()->json(['error' => $e->getMessage()], 400);
+            } elseif ($e instanceof NotFoundHttpException) {
+                return response()->json(['error' => $e->getMessage()], 404);
             }
         });
     }

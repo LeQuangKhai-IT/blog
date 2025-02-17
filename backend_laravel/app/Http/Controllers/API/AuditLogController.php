@@ -3,30 +3,41 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 
 class AuditLogController extends Controller
 {
     /**
-     * Retrieves a list of activity logs.
+     * Retrieve a list of audit logs.
+     *
+     * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        //
+        $logs = AuditLog::paginate(15);
+        return response()->json($logs);
     }
 
     /**
-     * Retrieves details of a specific log.
+     * Retrieve the details of a specific audit log.
+     *
+     * @param  \App\Models\AuditLog  $log
+     * @return \Illuminate\Http\Response
      */
-    public function show(string $id)
+    public function show(AuditLog $log)
     {
-        //
+        return response()->json($log);
     }
 
     /**
-     * Deletes a log.
+     * Delete a specific audit log.
+     *
+     * @param  \App\Models\AuditLog  $log
+     * @return \Illuminate\Http\Response
      */
-    public function destroy(string $id)
+    public function destroy(AuditLog $log)
     {
-        //
+        $log->delete();
+        return response()->json(['message' => 'Audit log deleted successfully']);
     }
 }

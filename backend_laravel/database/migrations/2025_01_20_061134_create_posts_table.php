@@ -25,7 +25,7 @@ return new class extends Migration
             $table->integer('views_count')->default(0);
             $table->integer('likes_count')->default(0);
             $table->timestamps();
-            $table->enum('status', ['published', 'draft', 'pending', 'scheduled', 'archived', 'private', 'trash'])->default('draft');
+            $table->boolean('published')->default(false);
             $table->dateTime('published_at')->nullable();
         });
     }

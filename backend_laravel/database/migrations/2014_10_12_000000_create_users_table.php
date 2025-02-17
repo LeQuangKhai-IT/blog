@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('fullname');
             $table->string('email')->unique();
             $table->string('password');
+            $table->string('provider_id')->nullable();
             $table->binary('profile_image')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('bio')->nullable();

@@ -6,6 +6,7 @@ use App\Http\Controllers\API\AuditLogController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\BackupController;
 use App\Http\Controllers\API\CategoryController;
+use App\Http\Controllers\API\CommentController;
 use App\Http\Controllers\API\MediaController;
 use App\Http\Controllers\API\NewsletterController;
 use App\Http\Controllers\API\PermissionController;
@@ -33,8 +34,9 @@ Route::prefix('posts')->controller(PostController::class)->group(function () {
     Route::get('/', 'index'); // Retrieve a list of all posts
     Route::get('/{post}', 'show'); // Retrieve the details of a specific post
     Route::post('/', 'store'); // Create a new post
-    Route::match(['put', 'patch'], '/{post}', 'update'); // Update a post
+    Route::put('/{post}', 'update'); // Update a post
     Route::delete('/{post}', 'destroy'); // Delete a post
+    Route::get('/published', 'getPublished'); // Retrieve a list of all posts published
     Route::get('/popular', 'getPopular'); // Retrieve a list of the most popular posts (based on views or likes)
     Route::get('/recent', 'getRecent'); // Retrieve a list of the most recent posts
     Route::post('/{post}/like', 'likePost'); // Like a post
@@ -49,7 +51,7 @@ Route::prefix('categories')->controller(CategoryController::class)->group(functi
     Route::get('/', 'index'); // Retrieve a list of all categories
     Route::get('/{category}', 'show'); // Retrieve the details of a specific category
     Route::post('/', 'store'); // Create a new category
-    Route::match(['put', 'patch'], '/{category}', 'update'); // Update a category
+    Route::put('/{category}', 'update'); // Update a category
     Route::delete('/{category}', 'destroy'); // Delete a category
     Route::get('/{category}/posts', 'index'); // Retrieve a list of the most popular categories (based on views or likes)
 });
@@ -58,12 +60,12 @@ Route::prefix('tags')->controller(TagController::class)->group(function () {
     Route::get('/', 'index'); // Retrieve a list of all tags
     Route::get('/{tag}', 'show'); // Retrieve the details of a specific tag
     Route::post('/', 'store'); // Create a new tag
-    Route::match(['put', 'patch'], '/{tag}', 'update'); // Update a tag
+    Route::put('/{tag}', 'update'); // Update a tag
     Route::delete('/{tag}', 'destroy'); // Delete a tag
 });
 
-Route::prefix('comments')->controller(TagController::class)->group(function () {
-    Route::match(['put', 'patch'], '/{comment}', 'update'); // Update a comment
+Route::prefix('comments')->controller(CommentController::class)->group(function () {
+    Route::put('/{comment}', 'update'); // Update a comment
     Route::delete('/{comment}', 'destroy'); // Delete a comment
     Route::post('/{comment}/like', 'likeComment'); // Like a comment
     Route::post('/{comment}/reply', 'replyToComment'); // Reply to a comment
@@ -77,8 +79,8 @@ Route::prefix('comments')->controller(TagController::class)->group(function () {
 Route::prefix('users')->middleware(['auth:sanctum', 'verified'])->controller(UserController::class)->group(function () {
     Route::get('/', 'index'); // Retrieve a list of all users
     Route::get('/{user}', 'show'); // Retrieve the details of a specific user
-    //Route::post('/', 'store'); // Register a new user
-    Route::match(['put', 'patch'], '/{user}', 'update'); // Update user information
+    Route::post('/', 'store'); // Create a new user
+    Route::put('/{user}', 'update'); // Update user information
     Route::delete('/{user}', 'destroy'); // Delete a user
     Route::get('/{user}/posts', 'getPostsByUser'); // Retrieve a list of posts created by a specific user
     Route::get('/{user}/comments', 'getCommentsByUser'); // Retrieve a list of comments by a specific user
@@ -89,14 +91,14 @@ Route::prefix('users')->middleware(['auth:sanctum', 'verified'])->controller(Use
 Route::prefix('roles')->controller(RoleController::class)->group(function () {
     Route::get('/', 'index'); // Retrieve a list of all roles
     Route::post('/', 'store'); // Register a new role
-    Route::match(['put', 'patch'], '/{role}', 'update'); // Update role information
+    Route::put('/{role}', 'update'); // Update role information
     Route::delete('/{role}', 'destroy'); // Delete a role
 });
 
 Route::prefix('permissions')->controller(PermissionController::class)->group(function () {
     Route::get('/', 'index'); // Retrieve a list of all permissions
     Route::post('/', 'store'); // Register a new permission
-    Route::match(['put', 'patch'], '/{permission}', 'update'); // Update permission information
+    Route::put('/{permission}', 'update'); // Update permission information
     Route::delete('/{permission}', 'destroy'); // Delete a permission
 });
 
@@ -109,12 +111,14 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/reset-password', 'resetPassword')->name('password.reset'); // Reset the password
     Route::post('/email/verification-notification', 'emailVerifyNotification')->middleware('auth:sanctum')->name('verification.notice'); // Send verify email to the user's email address
     Route::get('/email/verify/{id}/{hash}', 'verifyEmail')->middleware(['auth:sanctum'])->name('verification.verify'); // Verify the user's email address
+    //Route::get('/auth/{provider}', 'redirectToProvider'); //  Redirects the user to the OAuth provider for authentication
+    //Route::get('/auth/{provider}/callback', 'handleProviderCallback'); // Handle the callback after authentication
 });
 
 Route::prefix('media')->controller(MediaController::class)->group(function () {
     Route::get('/', 'index'); // Retrieve a list of all media files (images, videos, etc.)
     Route::post('/', 'store'); // Upload a media file
-    Route::match(['put', 'patch'], '/{media}', 'update'); // Update media file information
+    Route::put('/{media}', 'update'); // Update media file information
     Route::delete('/{media}', 'destroy'); // Delete a media file
     Route::get('/{media}/download', 'download'); // Download a media file
 });
@@ -149,28 +153,20 @@ Route::prefix('newsletter')->controller(NewsletterController::class)->group(func
     Route::post('/', 'store'); // Create and send a new newsletter
     Route::delete('/{newsletter}', 'destroy'); // Delete a newsletter
 });
-
-Route::prefix('notifications')->controller(NewsletterController::class)->group(function () {
+// Ok
+Route::prefix('notifications')->middleware('auth:sanctum')->controller(NewsletterController::class)->group(function () {
     Route::get('/', 'index'); // Retrieve a list of user notifications
     Route::put('/{notification}/read', 'markAsRead'); // Mark a notification as read
-    Route::delete('/{notification}', 'destroy'); //  Delete a notification
+    Route::delete('/{notification}', 'destroy')->middleware('role:admin'); //  Delete a notification
 });
-
-Route::prefix('ads')->controller(AdvertisementController::class)->group(function () {
-    Route::get('/', 'index'); // Retrieve a list of advertisements
-    Route::post('/', 'store'); // Create a new advertisement
-    Route::match(['put', 'patch'], '/{ads}', 'update'); // Update an advertisement
-    Route::delete('/{ads}', 'destroy'); // Delete an advertisement
-    Route::get('/{ads}/clicks', 'getClicks'); // Retrieve the number of clicks on an advertisement
-});
-
-Route::controller(BackupController::class)->group(function () {
+// Ok
+Route::middleware(['auth:sanctum', 'role:admin'])->controller(BackupController::class)->group(function () {
     Route::get('/backup', 'index'); // Retrieve a list of backups
     Route::post('/backup', 'store'); // Create a data backup
     Route::post('/restore', 'restore'); // Restore data from a backup
 });
-
-Route::prefix('logs')->controller(AuditLogController::class)->group(function () {
+// Ok
+Route::prefix('logs')->middleware(['auth:sanctum', 'role:admin'])->controller(AuditLogController::class)->group(function () {
     Route::get('/', 'index'); // Retrieve a list of activity logs
     Route::post('/{log}', 'show'); // Retrieve the details of a specific activity log
     Route::post('/{log}', 'destroy'); // Delete an activity log
