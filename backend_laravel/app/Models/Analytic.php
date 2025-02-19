@@ -12,7 +12,6 @@ class Analytic extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'id',
         'post_id',
         'views_count',
         'likes_count',

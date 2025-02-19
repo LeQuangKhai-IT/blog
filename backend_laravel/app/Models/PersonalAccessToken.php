@@ -11,7 +11,6 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'id',
         'name',
         'token',
         'abilities',

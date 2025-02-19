@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
-            $table->string('type'); // e.g., new comment, new like
-            $table->string('message');
-            $table->boolean('is_read')->default(false);
-            $table->timestamp('created_at')->nullable();
+            $table->string('type');
+            $table->uuidMorphs('notifiable');
+            $table->text('data');
+            $table->timestamp('read_at')->nullable();
+            $table->timestamps();
         });
     }
 

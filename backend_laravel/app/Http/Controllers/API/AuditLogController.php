@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreAuditLogRequest;
 use App\Models\AuditLog;
+use Illuminate\Support\Facades\Auth;
 
 class AuditLogController extends Controller
 {
@@ -14,7 +16,9 @@ class AuditLogController extends Controller
      */
     public function index()
     {
+
         $logs = AuditLog::paginate(15);
+
         return response()->json($logs);
     }
 
@@ -26,7 +30,29 @@ class AuditLogController extends Controller
      */
     public function show(AuditLog $log)
     {
-        return response()->json($log);
+
+        $logDetail = AuditLog::findOrFail($log);
+
+        return response()->json($logDetail);
+    }
+
+    /**
+     * Create a new audit log.
+     *
+     * @param  \App\Http\Requests\StoreAuditLogRequest  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(StoreAuditLogRequest $request)
+    {
+        $validated = $request->validated();
+
+        $log = AuditLog::create([
+            'activity' => $validated['activity'],
+            'user_id' => Auth::id(),
+            'details' => $validated['details'],
+        ]);
+
+        return response()->json(['message' => 'Log created successfully', 'log' => $log], 201);
     }
 
     /**
@@ -37,7 +63,10 @@ class AuditLogController extends Controller
      */
     public function destroy(AuditLog $log)
     {
-        $log->delete();
-        return response()->json(['message' => 'Audit log deleted successfully']);
+
+        $logDetail = AuditLog::findOrFail($log);
+        $logDetail->delete();
+
+        return response()->json(['message' => 'Activity log deleted successfully.']);
     }
 }

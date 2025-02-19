@@ -5,18 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Notification extends Model
+class Newsletter extends Model
 {
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'id',
-        'user_id',
-        'type',
-        'message',
-        'is_read',
+        'title',
+        'content',
+        'sent_at'
     ];
 
     /**
@@ -33,11 +30,8 @@ class Notification extends Model
      */
     public $incrementing = false;
 
-    /**
-     * Get the notification for the a user.
-     */
-    public function users(): BelongsTo
+    public function subscribers()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsToMany(User::class, 'newsletter_user', 'newsletter_id', 'user_id');
     }
 }

@@ -11,7 +11,6 @@ class Setting extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'id',
         'site_name',
         'contact_email',
         'description',

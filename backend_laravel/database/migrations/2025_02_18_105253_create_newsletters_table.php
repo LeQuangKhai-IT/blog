@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('backups', function (Blueprint $table) {
+        Schema::create('newsletters', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('file_name');
-            $table->string('file_path');
-            $table->timestamp('created_at')->nullable();
+            $table->string('title');
+            $table->text('content');
+            $table->timestamps();
         });
     }
 
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('backups');
+        Schema::dropIfExists('newsletters');
     }
 };

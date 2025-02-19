@@ -69,6 +69,7 @@ class PostController extends Controller
     /**
      * Deletes a post.
      *
+     * @param string $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(string $id)

@@ -12,7 +12,6 @@ class Media extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'id',
         'user_id',
         'file_name',
         'file_path',

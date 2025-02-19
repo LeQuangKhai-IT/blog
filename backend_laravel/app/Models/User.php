@@ -26,7 +26,6 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array<int, string>
      */
     protected $fillable = [
-        'id',
         'username',
         'fullname',
         'email',
@@ -95,7 +94,6 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notify(new VerifyEmail($id, $hash));
     }
 
-
     /**
      * Get the posts for a user.
      */
@@ -113,14 +111,6 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get the notifications for a user.
-     */
-    public function notifications(): HasMany
-    {
-        return $this->hasMany(Notification::class);
-    }
-
-    /**
      * Get the media for a user.
      */
     public function media(): HasMany
@@ -134,6 +124,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function comments(): HasMany
     {
         return $this->hasMany(Role::class);
+    }
+
+    /**
+     * Get the auditLogs for a user.
+     */
+    public function auditLogs()
+    {
+        return $this->hasMany(AuditLog::class);
     }
 
     /**

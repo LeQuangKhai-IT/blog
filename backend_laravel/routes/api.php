@@ -143,21 +143,22 @@ Route::prefix('settings')->controller(SettingController::class)->group(function 
     Route::put('/theme', 'updateTheme'); // Change the blog's theme
 });
 
-Route::controller(SubscriptionController::class)->group(function () {
-    Route::post('/subscribe', 'subscribe'); // Subscribe to email notifications
-    Route::post('/unsubscribe', 'unsubscribe'); // Unsubscribe from email notifications
-});
 
-Route::prefix('newsletter')->controller(NewsletterController::class)->group(function () {
+Route::prefix('newsletter')->middleware(['auth:sanctum'])->controller(NewsletterController::class)->group(function () {
     Route::get('/', 'index'); // Retrieve a list of sent newsletters
     Route::post('/', 'store'); // Create and send a new newsletter
+    Route::post('/subscribe', 'subscribe'); // Subscribe newsletters
+    Route::post('/unsubscribe', 'unsubscribe'); // Unsubscribe newsletters
     Route::delete('/{newsletter}', 'destroy'); // Delete a newsletter
 });
-// Ok
+
 Route::prefix('notifications')->middleware('auth:sanctum')->controller(NewsletterController::class)->group(function () {
     Route::get('/', 'index'); // Retrieve a list of user notifications
+    Route::get('/{notification}', 'show'); // Retrieve a specific notification's details
+    Route::post('/', 'store')->middleware('role:admin'); // Admin or System create a new notification
     Route::put('/{notification}/read', 'markAsRead'); // Mark a notification as read
-    Route::delete('/{notification}', 'destroy')->middleware('role:admin'); //  Delete a notification
+    Route::put('/mark-all-read', 'markAllAsRead'); // Mark all notifications as read
+    Route::delete('/{notification}', 'destroy')->middleware('role:admin'); // Delete a notification (Admin only)
 });
 // Ok
 Route::middleware(['auth:sanctum', 'role:admin'])->controller(BackupController::class)->group(function () {
@@ -169,5 +170,6 @@ Route::middleware(['auth:sanctum', 'role:admin'])->controller(BackupController::
 Route::prefix('logs')->middleware(['auth:sanctum', 'role:admin'])->controller(AuditLogController::class)->group(function () {
     Route::get('/', 'index'); // Retrieve a list of activity logs
     Route::post('/{log}', 'show'); // Retrieve the details of a specific activity log
+    Route::post('/', 'store'); // Create a new activity log
     Route::post('/{log}', 'destroy'); // Delete an activity log
 });

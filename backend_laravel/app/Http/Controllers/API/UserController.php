@@ -39,7 +39,7 @@ class UserController extends Controller
 
     /**
      * Retrieves details of a specific user.
-     *
+     * @param String $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(string $id)

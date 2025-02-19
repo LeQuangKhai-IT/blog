@@ -12,8 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('audit_logs', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('activity');
+            $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('details');
             $table->timestamps();
         });
     }

@@ -12,7 +12,6 @@ class Share extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'id',
         'post_id',
         'user_id',
         'platform', // facebook, instagram ..etc

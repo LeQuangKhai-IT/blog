@@ -13,7 +13,6 @@ class Comment extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'id',
         'content',
         'user_id',
         'commentable_id',
