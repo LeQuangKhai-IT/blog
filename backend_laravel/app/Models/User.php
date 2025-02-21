@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -81,17 +82,36 @@ class User extends Authenticatable implements MustVerifyEmail
         'news_letter' => false,
     ];
 
+    /**
+     * Automatically hash the user's password when setting it.
+     *
+     * @param  string  $value  The plain text password to be hashed.
+     * @return void
+     */
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password'] = Hash::make($value);
+    }
+
+    /**
+     * Send a password reset notification to the user.
+     *
+     * @param  string  $token  The password reset token generated for the user.
+     * @return void
+     */
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new ResetPassword($token));
     }
 
-    // Override sendEmailVerificationNotification
+    /**
+     * Send the email verification notification.
+     *
+     * @return void
+     */
     public function sendEmailVerificationNotification()
     {
-        $id = $this->id;
-        $hash = sha1($this->email);
-        $this->notify(new VerifyEmail($id, $hash));
+        $this->notify(new VerifyEmail);
     }
 
     /**
@@ -108,6 +128,22 @@ class User extends Authenticatable implements MustVerifyEmail
     public function likes(): HasMany
     {
         return $this->hasMany(Like::class);
+    }
+
+    /**
+     * Users this user is following.
+     */
+    public function follows()
+    {
+        return $this->belongsToMany(User::class, 'follows', 'follower_id', 'following_id')->withTimestamps();
+    }
+
+    /**
+     * People who are following this user.
+     */
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'follows', 'following_id', 'follower_id')->withTimestamps();
     }
 
     /**

@@ -19,7 +19,37 @@ class UserController extends Controller
     {
         $users = User::all();
 
-        return response()->json(UserResource::collection($users));
+        if ($users->isEmpty()) {
+            return response()->json([
+                'message' => 'No users found',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Users retrieved successfully',
+            'data' => $users,
+        ]);
+    }
+
+    /**
+     * Retrieves details of a specific user.
+     * @param String $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(string $id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'User retrieved successfully',
+            'data' => $user,
+        ]);
     }
 
     /**
@@ -31,22 +61,13 @@ class UserController extends Controller
     public function store(StoreUserRequest $request)
     {
 
-        $validatedData = $request->validated();
-        $user = User::create($validatedData);
+        $validated = $request->validated();
+        $user = User::create($validated);
 
-        return response()->json(UserResource::collection($user), 201);
-    }
-
-    /**
-     * Retrieves details of a specific user.
-     * @param String $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function show(string $id)
-    {
-        $user = User::findOrFail($id);
-
-        return response()->json($user);
+        return response()->json([
+            'message' => 'User created successfully',
+            'data' => $user,
+        ], 201);
     }
 
     /**
@@ -57,11 +78,21 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, string $id)
     {
-        $validatedData = $request->validated();
-        $user = User::findOrFail($id);
-        $user->update($validatedData);
+        $validated = $request->validated();
+        $user = User::find($id);
 
-        return response()->json($user);
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        $user->update($validated);
+
+        return response()->json([
+            'message' => 'User updated successfully',
+            'data' => $user,
+        ]);
     }
 
     /**
@@ -69,10 +100,19 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        $user = User::findOrFail($id);
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found',
+            ], 404);
+        }
+
         $user->delete();
 
-        return response()->json(null, 204);
+        return response()->json([
+            'message' => 'User deleted successfully',
+        ]);
     }
 
     /**
@@ -80,10 +120,20 @@ class UserController extends Controller
      */
     public function getPostsByUser(string $id)
     {
-        $user = User::findOrFail($id);
-        $user->delete();
+        $user = User::find($id);
 
-        return response()->json(null, 204);
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        $posts = $user->posts;
+
+        return response()->json([
+            'message' => 'Posts retrieved successfully',
+            'data' => $posts,
+        ]);
     }
 
     /**
@@ -91,10 +141,20 @@ class UserController extends Controller
      */
     public function getCommentsByUser(string $id)
     {
-        $user = User::findOrFail($id);
-        $user->delete();
+        $user = User::find($id);
 
-        return response()->json(null, 204);
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        $comments = $user->comments;
+
+        return response()->json([
+            'message' => 'Comments retrieved successfully',
+            'data' => $comments,
+        ]);
     }
 
     /**
@@ -102,10 +162,19 @@ class UserController extends Controller
      */
     public function followUser(string $id)
     {
-        $user = User::findOrFail($id);
-        $user->delete();
+        $user = User::find($id);
 
-        return response()->json(null, 204);
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found',
+            ], 404);
+        }
+        $authUser = User::find(auth()->user());
+        $authUser->follows()->attach($user->id);
+
+        return response()->json([
+            'message' => 'User followed successfully',
+        ]);
     }
 
     /**
@@ -113,9 +182,18 @@ class UserController extends Controller
      */
     public function unfollowUser(string $id)
     {
-        $user = User::findOrFail($id);
-        $user->delete();
+        $user = User::find($id);
 
-        return response()->json(null, 204);
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found',
+            ], 404);
+        }
+        $authUser = User::find(auth()->user());
+        $authUser->follows()->detach($user->id);
+
+        return response()->json([
+            'message' => 'User unfollowed successfully',
+        ]);
     }
 }

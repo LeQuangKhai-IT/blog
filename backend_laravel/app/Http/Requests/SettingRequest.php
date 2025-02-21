@@ -4,14 +4,14 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreCommentRequest extends FormRequest
+class SettingRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,10 @@ class StoreCommentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'title' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'logo' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+            'theme' => 'nullable|string|max:255',
         ];
     }
 }

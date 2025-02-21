@@ -2,24 +2,24 @@
 
 namespace App\Events;
 
-use App\Models\Notification;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class NotificationSent extends ShouldBroadcast
+class PostDeleted
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $notification;
     /**
      * Create a new event instance.
      */
-    public function __construct(Notification $notification)
+    public function __construct()
     {
-        $this->$notification = $notification;
+        //
     }
 
     /**
@@ -30,7 +30,7 @@ class NotificationSent extends ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PresenceChannel('notifications.' . $this->notification->user_id),
+            new PrivateChannel('channel-name'),
         ];
     }
 }

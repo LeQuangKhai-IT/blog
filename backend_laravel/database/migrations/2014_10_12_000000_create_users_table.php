@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('url_fb')->nullable();
             $table->string('url_linkedin')->nullable();
             $table->boolean('news_letter')->default(false);
+            $table->softDeletes();
             $table->rememberToken();
             $table->timestamps();
         });

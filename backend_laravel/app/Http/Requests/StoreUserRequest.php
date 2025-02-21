@@ -11,7 +11,7 @@ class StoreUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -25,7 +25,7 @@ class StoreUserRequest extends FormRequest
             'username' => 'required|string|max:255|unique:users,username',
             'fullname' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:8',
             'bio' => 'nullable|string',
             'avatar' => 'nullable|string',
             'url_fb' => 'nullable|url:http,https',

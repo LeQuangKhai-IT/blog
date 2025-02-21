@@ -24,6 +24,7 @@ return new class extends Migration
             $table->foreignUuid('category_id')->constrained('categories')->onDelete('cascade');
             $table->integer('views_count')->default(0);
             $table->integer('likes_count')->default(0);
+            $table->softDeletes();
             $table->timestamps();
             $table->boolean('published')->default(false);
             $table->dateTime('published_at')->nullable();

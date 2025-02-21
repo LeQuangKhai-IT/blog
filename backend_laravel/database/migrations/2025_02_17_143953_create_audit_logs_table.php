@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('activity');
             $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
             $table->string('details');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

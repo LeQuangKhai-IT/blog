@@ -3,47 +3,120 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreTagRequest;
+use App\Http\Requests\TagRequest;
+use App\Http\Requests\UpdateTagRequest;
+use App\Models\Tag;
 
 class TagController extends Controller
 {
     /**
-     * Retrieves a list of all tags.
+     * Retrieve a list of all tags.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
-        //
+        $tags = Tag::all();
+
+        if ($tags->isEmpty()) {
+            return response()->json([
+                'message' => 'No tags found',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Tags retrieved successfully',
+            'data' => $tags,
+        ]);
     }
 
     /**
-     * Creates a new tag.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Retrieves a list of posts related to a specific tag.
+     * Retrieve the details of a specific tag.
+     *
+     * @param  string $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show(string $id)
     {
-        //
+        $tag = Tag::find($id);
+
+        if (!$tag) {
+            return response()->json([
+                'message' => 'Tag not found',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Tag retrieved successfully',
+            'data' => $tag,
+        ]);
     }
 
     /**
-     * Updates a tag.
+     * Create a new tag.
+     *
+     * @param  \App\Http\Requests\StoreTagRequest  $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, string $id)
+    public function store(StoreTagRequest $request)
     {
-        //
+        $validated = $request->validated();
+        $tag = Tag::create($validated);
+
+        return response()->json([
+            'message' => 'Tag created successfully',
+            'data' => $tag,
+        ], 201);
     }
 
     /**
-     * Deletes a tag.
+     * Update an existing tag.
+     *
+     * @param  \App\Http\Requests\UpdateTagRequest  $request
+     * @param  string $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(UpdateTagRequest $request, string $id)
+    {
+        $validated = $request->validated();
+
+        $tag = Tag::find($id);
+
+        if (!$tag) {
+            return response()->json([
+                'message' => 'Tag not found',
+            ], 404);
+        }
+
+        $tag->update($validated);
+
+        return response()->json([
+            'message' => 'Tag updated successfully',
+            'data' => $tag,
+        ]);
+    }
+
+    /**
+     * Delete a tag.
+     *
+     * @param  string $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(string $id)
     {
-        //
+        $tag = Tag::find($id);
+
+        if (!$tag) {
+            return response()->json([
+                'message' => 'Tag not found',
+            ], 404);
+        }
+
+        $tag->delete();
+
+        return response()->json([
+            'message' => 'Tag deleted successfully',
+        ]);
     }
 }

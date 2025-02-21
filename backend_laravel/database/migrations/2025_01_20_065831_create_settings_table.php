@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('copy_rights')->nullable();
             $table->string('url_fb')->nullable();
             $table->string('url_linkedin')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

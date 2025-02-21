@@ -27,7 +27,6 @@ class PostFactory extends Factory
             'title' => $title,
             'slug' => Str::slug($title),
             'content' => fake()->paragraphs(5, true),
-            'status' => fake()->randomElement(['draft', 'pending', 'scheduled', 'archived', 'private', 'trash']), // thêm 'published',
             'user_id' => User::pluck('id')->random(),
             'category_id' => Category::pluck('id')->random(),
             'created_at' => fake()->dateTimeBetween('-1 years', 'now'),

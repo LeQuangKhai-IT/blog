@@ -5,192 +5,306 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
-use App\Http\Resources\PostResource;
-use App\Models\Like;
 use App\Models\Post;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
     /**
-     * Retrieves a list of all posts.
+     * Retrieve a list of all posts.
      *
-     * @return \Illuminate\Http\JsonResponse;
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
         $posts = Post::all();
 
-        return response()->json(PostResource::collection($posts));
+        if ($posts->isEmpty()) {
+            return response()->json([
+                'message' => 'No posts found',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Posts retrieved successfully',
+            'data' => $posts,
+        ]);
     }
 
     /**
-     * Creates a new post.
+     * Retrieve the details of a specific post.
      *
-     * @param  App\Http\Requests\StorePostRequest  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function store(StorePostRequest $request)
-    {
-        $validatedData = $request->validated();
-        $post = Post::create($validatedData);
-
-        return response()->json(PostResource::collection($post), 201);
-    }
-
-    /**
-     * Retrieves details of a specific post.
-     *
+     * @param string $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(string $id)
     {
-        $post = Post::findOrFail($id);
+        $post = Post::find($id);
 
-        return response()->json($post);
+        if (!$post) {
+            return response()->json([
+                'message' => 'Post not found',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Post retrieved successfully',
+            'data' => $post,
+        ]);
     }
 
     /**
-     * Updates a post.
+     * Create a new post.
      *
-     * @param  App\Http\Requests\UpdatePostRequest  $request
+     * @param \App\Http\Requests\StorePostRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(StorePostRequest $request)
+    {
+        $post = Post::create($request->validated());
+
+        return response()->json([
+            'message' => 'Post created successfully',
+            'post' => $post
+        ], 201);
+    }
+
+    /**
+     * Update a post.
+     *
+     * @param \App\Http\Requests\UpdatePostRequest $request
+     * @param string $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdatePostRequest $request, string $id)
     {
-        $validatedData = $request->validated();
+        $post = Post::find($id);
 
-        $post = Post::findOrFail($id);
-        $post->update($validatedData);
+        if (!$post) {
+            return response()->json([
+                'message' => 'Post not found',
+            ], 404);
+        }
 
-        return response()->json($post);
+        $post->update($request->validated());
+        return response()->json([
+            'message' => 'Post updated successfully',
+            'post' => $post
+        ]);
     }
 
     /**
-     * Deletes a post.
+     * Delete a post.
      *
      * @param string $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(string $id)
     {
-        $post = Post::findOrFail($id);
-        $post->delete();
+        $post = Post::find($id);
 
-        return response()->json(null, 204);
+        if (!$post) {
+            return response()->json([
+                'message' => 'Post not found',
+            ], 404);
+        }
+
+        $post->delete();
+        return response()->json(['message' => 'Post deleted successfully']);
     }
 
     /**
-     * Retrieves a list of all posts published.
+     * Retrieve a list of all published posts.
      *
-     * @return \Illuminate\Http\JsonResponse;
+     * @return \Illuminate\Http\JsonResponse
      */
     public function getPublished()
     {
-        $posts = Post::where('published', true)->get();
-        return response()->json($posts);
+        $posts = Post::where('is_published', true)->get();
+
+        if ($posts->isEmpty()) {
+            return response()->json([
+                'No published posts found',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Published posts retrieved successfully',
+            'data' => $posts,
+        ]);
     }
 
     /**
-     * Retrieves popular posts.
+     * Retrieve a list of the most popular posts (based on views).
      *
-     * @param  string  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function getPopular()
     {
-        return response()->json(null, 204);
+        $posts = Post::orderBy('views', 'desc')->limit(10)->get();
+
+        if ($posts->isEmpty()) {
+            return response()->json([
+                'message' => 'No posts found by views',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Posts retrieved by views successfully',
+            'data' => $posts,
+        ]);
     }
 
     /**
-     * Retrieves recent posts.
+     * Retrieve a list of the most recent posts.
      *
-     * @param  string  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function getRecent()
     {
-        return response()->json(null, 204);
+        $posts = Post::latest()->limit(5)->get();
+
+        if ($posts->isEmpty()) {
+            return response()->json([
+                'message' => 'No recent posts found',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Top 5 latest posts retrieved successfully',
+            'data' => $posts,
+        ]);
     }
 
     /**
-     * Likes a post.
+     * Like a post.
      *
+     * @param string id
      * @return \Illuminate\Http\JsonResponse
      */
     public function likePost(string $id)
     {
-        return response()->json(null, 204);
+        $post = Post::find($id);
+
+        if (!$post) {
+            return response()->json([
+                'message' => 'Post not found',
+            ], 404);
+        }
+
+        $post->likes()->attach(auth()->id());
+
+        return response()->json([
+            'message' => 'Post liked successfully',
+        ], 200);
     }
 
     /**
-     * Unlikes a post.
+     * Unlike a post.
      *
+     * @param string id
      * @return \Illuminate\Http\JsonResponse
      */
     public function unlikePost(string $id)
     {
-        return response()->json(null, 204);
+        $post = Post::find($id);
+
+        if (!$post) {
+            return response()->json([
+                'message' => 'Post not found',
+            ], 404);
+        }
+
+        $post->likes()->detach(auth()->id());
+
+        return response()->json([
+            'message' => 'Post unliked successfully',
+        ]);
     }
 
     /**
-     * Retrieves related posts.
+     * Retrieve related posts.
      *
+     * @param string id
      * @return \Illuminate\Http\JsonResponse
      */
     public function relatedPosts(string $id)
     {
-        return response()->json(null, 204);
+        $post = Post::find($id);
+
+        if (!$post) {
+            return response()->json([
+                'message' => 'Post not found',
+            ], 404);
+        }
+
+        $relatedPosts = Post::where('category_id', $post->category_id)
+            ->where('id', '!=', $post->id)
+            ->get();
+
+        return response()->json([
+            'message' => 'Related posts retrieved successfully',
+            'data' => $relatedPosts,
+        ]);
     }
 
     /**
-     * Retrieves a post by its slug.
+     * Retrieve a post by its slug.
      *
-     * @param  string  $id
+     * @param string $slug
      * @return \Illuminate\Http\JsonResponse
      */
-    public function showBySlug(string $slug)
+    public function showBySlug($slug)
     {
-        return response()->json(null, 204);
+        $post = Post::where('slug', $slug)->firstOrFail();
+
+        return response()->json([
+            'message' => 'Post retrieved successfully',
+            'data' => $post,
+        ]);
     }
 
     /**
-     * Handles sharing a post on social media.
+     * Share a post on social media.
      *
+     * @param string id
      * @return \Illuminate\Http\JsonResponse
      */
     public function sharePost(string $id)
     {
-        return response()->json(null, 204);
+        // Logic for sharing on social media goes here
+        return response()->json(['message' => 'Post shared successfully']);
     }
 
     /**
-     * Searches for posts.
+     * Search for posts by keyword.
      *
-     * @param  string  $id
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function search(Request $request, $id)
+    public function search(Request $request)
     {
-        return response()->json(null, 204);
-    }
+        $query = $request->query('keyword');
 
-    /**
-     * Request auth before like.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function like(Post $post)
-    {
-        if (auth()->check()) {
-            Like::create([
-                'user_id' => auth()->id(),
-                'post_id' => $post->id,
-            ]);
-
-            return response()->json(['message' => 'Post liked!']);
+        if (!$query) {
+            return response()->json([
+                'message' => 'No search keyword provided',
+            ], 400);
         }
 
-        return response()->json(['message' => 'You must be logged in to like.'], 403);
+        $posts = Post::where('title', 'like', "%{$query}%")
+            ->orWhere('content', 'like', "%{$query}%")
+            ->get();
+
+        if ($posts->isEmpty()) {
+            return response()->json([
+                'message' => 'No posts found for the given keyword',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Posts retrieved successfully',
+            'data' => $posts,
+        ]);
     }
 }
