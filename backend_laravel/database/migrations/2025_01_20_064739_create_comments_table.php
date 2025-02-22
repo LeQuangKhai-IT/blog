@@ -21,7 +21,6 @@ return new class extends Migration
             $table->uuid('commentable_id');
             $table->string('commentable_type');
             $table->foreignUuid('parent_id')->nullable()->constrained('comments')->onDelete('cascade');
-            $table->softDeletes();
             $table->timestamps();
         });
     }

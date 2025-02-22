@@ -34,6 +34,8 @@ Route::prefix('posts')->controller(PostController::class)->group(function () {
     Route::post('/', 'store'); // Create a new post
     Route::put('/{post}', 'update'); // Update a post
     Route::delete('/{post}', 'destroy'); // Delete a post
+    Route::post('/{post}/publish', 'publishPost'); // Publish a post
+    Route::post('/{post}/unpublish', 'unpublishPost'); //Unpublish a post
     Route::get('/published', 'getPublished'); // Retrieve a list of all posts published
     Route::get('/popular', 'getPopular'); // Retrieve a list of the most popular posts (based on views)
     Route::get('/recent', 'getRecent'); // Retrieve a list of the most recent posts
@@ -82,24 +84,24 @@ Route::prefix('users')->middleware(['auth:sanctum', 'verified'])->controller(Use
     Route::delete('/{user}', 'destroy'); // Delete a user
     Route::get('/{user}/posts', 'getPostsByUser'); // Retrieve a list of posts created by a specific user
     Route::get('/{user}/comments', 'getCommentsByUser'); // Retrieve a list of comments by a specific user
-    Route::post('/follow/{user}', 'followUser'); // Follow a user
-    Route::post('/unfollow/{user}', 'unfollowUser'); // Unfollow a user
+});
+// Chưa gì hết
+Route::prefix('roles')->controller(RolePermissionController::class)->group(function () {
+    Route::get('/', 'indexRoles'); // Retrieve all roles
+    Route::post('/', 'storeRole'); // Create a new role
+    Route::put('/{role}', 'updateRole'); // Update an existing role
+    Route::delete('/{role}', 'destroyRole'); // Delete a role
+    Route::post('/{role}/permissions', 'assignPermissionToRole'); // Assign permission to a role
+    Route::delete('/{role}/permissions/{permission}', 'removePermissionFromRole'); // Remove permission from a role
+});
+// Chưa gì hết
+Route::prefix('permissions')->controller(RolePermissionController::class)->group(function () {
+    Route::get('/', 'indexPermissions'); // Retrieve all permissions
+    Route::post('/', 'storePermission'); // Create a new permission
+    Route::put('/{permission}', 'updatePermission'); // Update an existing permission
+    Route::delete('/{permission}', 'destroyPermission'); // Delete a permission
 });
 
-Route::prefix('roles-permissions')->controller(RolePermissionController::class)->group(function () {
-    Route::get('/roles', 'indexRoles'); // Retrieve all roles
-    Route::post('/roles', 'storeRole'); // Create a new role
-    Route::put('/roles/{role}', 'updateRole'); // Update an existing role
-    Route::delete('/roles/{role}', 'destroyRole'); // Delete a role
-
-    Route::get('/permissions', 'indexPermissions'); // Retrieve all permissions
-    Route::post('/permissions', 'storePermission'); // Create a new permission
-    Route::put('/permissions/{permission}', 'updatePermission'); // Update an existing permission
-    Route::delete('/permissions/{permission}', 'destroyPermission'); // Delete a permission
-
-    Route::post('/roles/{role}/permissions', 'assignPermissionToRole'); // Assign permission to a role
-    Route::delete('/roles/{role}/permissions/{permission}', 'removePermissionFromRole'); // Remove permission from a role
-});
 // Ok còn 2 cái cuối
 Route::controller(AuthController::class)->group(function () {
     Route::post('/register', 'register'); // Register a new account
@@ -127,7 +129,7 @@ Route::prefix('media')->controller(MediaController::class)->group(function () {
 //     Route::get('/search/advanced?query={keyword}&category={id}&tag={id}', 'advancedSearch'); // Advanced search with category and tag filters
 // });
 
-// Ok
+// Okkkkk
 Route::prefix('analytics')->controller(AnalyticsController::class)->group(function () {
     Route::get('/posts', 'postAnalytics'); // Retrieve statistics like views or likes for posts
     Route::get('/users', 'userAnalytics'); // Retrieve user statistics (e.g., registered users, activity)
@@ -135,14 +137,14 @@ Route::prefix('analytics')->controller(AnalyticsController::class)->group(functi
     Route::get('/tags', 'tagAnalytics'); // Retrieve post counts for each tag
     Route::get('/traffic', 'trafficAnalytics'); // Retrieve post counts for each tag
 });
-//Ok
+// Chưa gì hết
 Route::prefix('settings')->controller(SettingController::class)->group(function () {
     Route::get('/', 'index'); // Retrieve blog configuration settings (title, description, logo, etc.)
     Route::put('/', 'update'); // Update blog configuration settings
     Route::get('/theme', 'getTheme'); // Retrieve information about the blog theme
     Route::put('/theme', 'updateTheme'); // Change the blog's theme
 });
-
+// Chưa gì hết
 Route::prefix('newsletter')->middleware(['auth:sanctum'])->controller(NewsletterController::class)->group(function () {
     Route::get('/', 'index'); // Retrieve a list of sent newsletters
     Route::post('/', 'store'); // Create and send a new newsletter
@@ -159,16 +161,14 @@ Route::prefix('notifications')->middleware('auth:sanctum')->controller(Newslette
     Route::put('/mark-all-read', 'markAllAsRead'); // Mark all notifications as read
     Route::delete('/{notification}', 'destroy')->middleware('role:admin'); // Delete a notification (Admin only)
 });
-// Ok
+// Okkk
 Route::middleware(['auth:sanctum', 'role:admin'])->controller(BackupController::class)->group(function () {
     Route::get('/backup', 'index'); // Retrieve a list of backups
     Route::post('/backup', 'store'); // Create a data backup
     Route::post('/restore', 'restore'); // Restore data from a backup
 });
-// Ok
+// Okkk
 Route::prefix('logs')->middleware(['auth:sanctum', 'role:admin'])->controller(AuditLogController::class)->group(function () {
     Route::get('/', 'index'); // Retrieve a list of activity logs
-    Route::post('/{log}', 'show'); // Retrieve the details of a specific activity log
-    Route::post('/', 'store'); // Create a new activity log
     Route::post('/{log}', 'destroy'); // Delete an activity log
 });

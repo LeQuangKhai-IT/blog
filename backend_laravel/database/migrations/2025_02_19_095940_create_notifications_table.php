@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('type');
             $table->uuidMorphs('notifiable');
             $table->text('data');
-            $table->softDeletes();
             $table->timestamp('read_at')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

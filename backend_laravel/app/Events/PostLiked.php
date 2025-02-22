@@ -2,35 +2,27 @@
 
 namespace App\Events;
 
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Foundation\Events\Dispatchable;
+use App\Models\Post;
+use App\Models\User;
 use Illuminate\Queue\SerializesModels;
 
 class PostLiked
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use SerializesModels;
+
+    public $post;
+    public $user;
 
     /**
      * Create a new event instance.
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
-     * Get the channels the event should broadcast on.
      *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @param \App\Models\User $user The user that was liked.
+     * @param \App\Models\Post $post The post that was liked.
+     * @return void
      */
-    public function broadcastOn(): array
+    public function __construct(Post $post, User $user)
     {
-        return [
-            new PrivateChannel('channel-name'),
-        ];
+        $this->post = $post;
+        $this->user = $user;
     }
 }

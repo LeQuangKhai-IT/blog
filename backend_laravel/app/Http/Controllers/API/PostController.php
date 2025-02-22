@@ -2,10 +2,17 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Events\PostCreated;
+use App\Events\PostDeleted;
+use App\Events\PostLiked;
+use App\Events\PostPublished;
+use App\Events\PostUnPublished;
+use App\Events\PostUpdated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Models\Post;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -63,6 +70,8 @@ class PostController extends Controller
     {
         $post = Post::create($request->validated());
 
+        event(new PostCreated($post));
+
         return response()->json([
             'message' => 'Post created successfully',
             'post' => $post
@@ -87,6 +96,9 @@ class PostController extends Controller
         }
 
         $post->update($request->validated());
+
+        event(new PostUpdated($post));
+
         return response()->json([
             'message' => 'Post updated successfully',
             'post' => $post
@@ -110,7 +122,73 @@ class PostController extends Controller
         }
 
         $post->delete();
+
+        event(new PostDeleted($post));
+
         return response()->json(['message' => 'Post deleted successfully']);
+    }
+
+    /**
+     * Publish a post by its ID.
+     *
+     * @param string $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function publishPost(string $id)
+    {
+        $post = Post::find($id);
+
+        if (!$post) {
+            return response()->json([
+                'message' => 'Post not found',
+            ], 404);
+        }
+
+        if ($post->published_at) {
+            return response()->json(['message' => 'This post is already published.'], 400);
+        }
+
+        $post->update([
+            'published' => true,
+            'published_at' => Carbon::now(),
+        ]);
+
+        event(new PostPublished($post));
+
+        // Return success response
+        return response()->json(['message' => 'Post published successfully!', 'post' => $post], 200);
+    }
+
+    /**
+     * Unpublish a post by its ID.
+     *
+     * @param string $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function unpublishPost(string $id)
+    {
+        $post = Post::find($id);
+
+        if (!$post) {
+            return response()->json([
+                'message' => 'Post not found',
+            ], 404);
+        }
+
+        if (!$post->published_at) {
+            return response()->json(['message' => 'This post is not currently published.'], 400);
+        }
+
+        // Update the post's published status and clear the published_at timestamp
+        $post->update([
+            'published' => false,
+            'published_at' => null,
+        ]);
+
+        event(new PostUnPublished($post));
+
+        // Return success response
+        return response()->json(['message' => 'Post unpublished successfully!', 'post' => $post], 200);
     }
 
     /**
@@ -193,6 +271,8 @@ class PostController extends Controller
         }
 
         $post->likes()->attach(auth()->id());
+
+        event(new PostLiked($post, auth()->user()));
 
         return response()->json([
             'message' => 'Post liked successfully',

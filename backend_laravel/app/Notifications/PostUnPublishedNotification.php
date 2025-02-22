@@ -1,0 +1,75 @@
+<?php
+
+namespace App\Notifications;
+
+use App\Models\Post;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\BroadcastMessage;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
+
+class PostUnPublishedNotification extends Notification implements ShouldQueue
+{
+    use Queueable;
+
+    protected $post;
+
+    /**
+     * Create a new notification instance.
+     *
+     * This notification is sent when a post is unpublished.
+     *
+     * @param \App\Models\Post $post The post that was unpublished.
+     * @return void
+     */
+    public function __construct(Post $post)
+    {
+        $this->post = $post;
+    }
+
+    /**
+     * Get the notification's delivery channels.
+     *
+     * Notifications are delivered via database and broadcast.
+     *
+     * @param mixed $notifiable
+     * @return array
+     */
+    public function via($notifiable)
+    {
+        return ['database', 'broadcast'];
+    }
+
+    /**
+     * Get the array representation of the notification.
+     *
+     * @param mixed $notifiable
+     * @return array
+     */
+    public function toDatabase($notifiable)
+    {
+        return [
+            'post_id' => $this->post->id,
+            'title' => $this->post->title,
+            'author' => $this->post->author->name,
+            'message' => "The post titled '{$this->post->title}' was unpublished.",
+        ];
+    }
+
+    /**
+     * Prepare the data for broadcasting a notification.
+     *
+     * @param  \Illuminate\Notifications\Notifiable  $notifiable
+     * @return \Illuminate\Broadcasting\BroadcastMessage
+     */
+    public function toBroadcast($notifiable)
+    {
+        return new BroadcastMessage([
+            'post_id' => $this->post->id,
+            'title' => $this->post->title,
+            'author' => $this->post->author->name,
+            'message' => "The post titled '{$this->post->title}' was unpublished.",
+        ]);
+    }
+}

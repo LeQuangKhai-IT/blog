@@ -12,7 +12,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use App\Models\User;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -48,6 +51,7 @@ class AuthController extends Controller
             $user->tokens()->oldest()->first()->delete();
         }
 
+        event(new Login('sanctum', $user, true));
         return response()->json([
             'access_token' => $user->createToken(env('SIGNIN_TOKEN'), ['*'], Carbon::now()->addMinute(60))->plainTextToken,
             'token_type' => 'Bearer',
@@ -88,7 +92,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-
+        event(new Logout('sanctum', $request->user()));
         return response()->json([
             'message' => 'Logged out successfully.'
         ]);
@@ -168,6 +172,8 @@ class AuthController extends Controller
         }
 
         $request->fulfill();
+
+        event(new Verified($request->user()));
 
         return response()->json(['message' => 'Email verified successfully.']);
     }

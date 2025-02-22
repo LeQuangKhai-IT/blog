@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('file_name');
             $table->string('file_path');
             $table->string('file_type'); // e.g., image, video
-            $table->softDeletes();
+            $table->morphs('mediable');
             $table->timestamp('created_at')->nullable();
         });
     }

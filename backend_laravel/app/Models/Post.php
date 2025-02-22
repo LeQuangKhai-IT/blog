@@ -17,7 +17,7 @@ class Post extends Model
         'slug',
         'title',
         'content',
-        'image_url',
+        'image',
         'user_id',
         'category_id',
         'status',
@@ -44,7 +44,7 @@ class Post extends Model
      * @var array
      */
     protected $attributes = [
-        'image_url' => '',
+        'image' => '',
     ];
 
     /**

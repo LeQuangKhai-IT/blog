@@ -16,9 +16,19 @@ class BackupController extends Controller
      */
     public function index()
     {
-        // Get a list of available backup files in the backup directory
         $backupFiles = Storage::disk('local')->files('backups');
-        return response()->json($backupFiles);
+
+        if (empty($backupFiles)) {
+            return response()->json([
+                'message' => 'No backup files found.',
+                'backupFiles' => [],
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Backup files found.',
+            'backupFiles' => $backupFiles,
+        ]);
     }
 
     /**

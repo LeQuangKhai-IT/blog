@@ -15,10 +15,9 @@ class AnalyticsController extends Controller
     /**
      * Retrieve post analytics (e.g., views, likes).
      *
-     * @param AnalyticsRequest $request
      * @return JsonResponse
      */
-    public function postAnalytics(AnalyticsRequest $request)
+    public function postAnalytics()
     {
         $posts = Post::with('likes', 'views')->get();
 
@@ -35,10 +34,9 @@ class AnalyticsController extends Controller
     /**
      * Retrieve user analytics (e.g., registered users, activity).
      *
-     * @param AnalyticsRequest $request
      * @return JsonResponse
      */
-    public function userAnalytics(AnalyticsRequest $request)
+    public function userAnalytics()
     {
         $users = User::all();
 
@@ -55,10 +53,9 @@ class AnalyticsController extends Controller
     /**
      * Retrieve comment analytics (e.g., activity).
      *
-     * @param AnalyticsRequest $request
      * @return JsonResponse
      */
-    public function commentAnalytics(AnalyticsRequest $request)
+    public function commentAnalytics()
     {
         $comments = Comment::all();
 
@@ -75,10 +72,9 @@ class AnalyticsController extends Controller
     /**
      * Retrieve tag analytics (e.g., post counts for each tag).
      *
-     * @param AnalyticsRequest $request
      * @return JsonResponse
      */
-    public function tagAnalytics(AnalyticsRequest $request)
+    public function tagAnalytics()
     {
         $tags = Tag::withCount('posts')->get();
 
@@ -95,13 +91,11 @@ class AnalyticsController extends Controller
     /**
      * Retrieve traffic analytics.
      *
-     * @param AnalyticsRequest $request
      * @return JsonResponse
      */
-    public function trafficAnalytics(AnalyticsRequest $request)
+    public function trafficAnalytics()
     {
-        // Placeholder for traffic analytics logic
-        $traffic = []; // You will populate this based on your traffic data
+        $traffic = [];
 
         if (empty($traffic)) {
             return response()->json(['message' => 'No traffic data found'], 404);

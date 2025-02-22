@@ -156,44 +156,4 @@ class UserController extends Controller
             'data' => $comments,
         ]);
     }
-
-    /**
-     * Follows a user.
-     */
-    public function followUser(string $id)
-    {
-        $user = User::find($id);
-
-        if (!$user) {
-            return response()->json([
-                'message' => 'User not found',
-            ], 404);
-        }
-        $authUser = User::find(auth()->user());
-        $authUser->follows()->attach($user->id);
-
-        return response()->json([
-            'message' => 'User followed successfully',
-        ]);
-    }
-
-    /**
-     * Unfollows a user.
-     */
-    public function unfollowUser(string $id)
-    {
-        $user = User::find($id);
-
-        if (!$user) {
-            return response()->json([
-                'message' => 'User not found',
-            ], 404);
-        }
-        $authUser = User::find(auth()->user());
-        $authUser->follows()->detach($user->id);
-
-        return response()->json([
-            'message' => 'User unfollowed successfully',
-        ]);
-    }
 }

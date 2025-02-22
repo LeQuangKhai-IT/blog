@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreAuditLogRequest;
 use App\Models\AuditLog;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Controller;
+
 
 class AuditLogController extends Controller
 {
@@ -19,54 +18,36 @@ class AuditLogController extends Controller
 
         $logs = AuditLog::paginate(15);
 
-        return response()->json($logs);
-    }
+        if ($logs->isEmpty()) {
+            return response()->json(['message' => 'No logs found'], 404);
+        }
 
-    /**
-     * Retrieve the details of a specific audit log.
-     *
-     * @param  \App\Models\AuditLog  $log
-     * @return \Illuminate\Http\Response
-     */
-    public function show(AuditLog $log)
-    {
-
-        $logDetail = AuditLog::findOrFail($log);
-
-        return response()->json($logDetail);
-    }
-
-    /**
-     * Create a new audit log.
-     *
-     * @param  \App\Http\Requests\StoreAuditLogRequest  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(StoreAuditLogRequest $request)
-    {
-        $validated = $request->validated();
-
-        $log = AuditLog::create([
-            'activity' => $validated['activity'],
-            'user_id' => Auth::id(),
-            'details' => $validated['details'],
+        return response()->json([
+            'message' => 'Logs retrieved successfully',
+            'data' => $logs
         ]);
-
-        return response()->json(['message' => 'Log created successfully', 'log' => $log], 201);
     }
 
     /**
      * Delete a specific audit log.
      *
-     * @param  \App\Models\AuditLog  $log
+     * @param  string $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(AuditLog $log)
+    public function destroy(string $id)
     {
+        $logDetail = AuditLog::find($id);
 
-        $logDetail = AuditLog::findOrFail($log);
+        if (!$logDetail) {
+            return response()->json([
+                'message' => 'Log not found',
+            ], 404);
+        }
+
         $logDetail->delete();
 
-        return response()->json(['message' => 'Activity log deleted successfully.']);
+        return response()->json([
+            'message' => 'Activity log deleted successfully.'
+        ]);
     }
 }
